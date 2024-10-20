@@ -1,213 +1,210 @@
+This code implements a simple math quiz game where random arithmetic questions are presented to the user, who must answer them within a limited time. Let's break down each part of the code:
+
+
+
+
+
 1. Importing Libraries
 import random
 import time
-random: Used for generating random numbers.
-time: Used for measuring the start and end time for each question.
-.
+random: This library is used to generate random numbers.
+time: This library is used for measuring time and controlling the time limit for answering questions.
 
 
 
-2. Defining the question_generator Function
+2. Function to Convert Persian Digits to English
+def convert_farsi_digits_to_english(input_str):
+    persian_digits = '۰۱۲۳۴۵۶۷۸۹'
+    english_digits = '0123456789'
+    translation_table = str.maketrans(persian_digits, english_digits)
+    return input_str.translate(translation_table)
+This function takes a string input of Persian digits and converts them to their English equivalents.
+It uses str.maketrans to create a translation table and then applies this translation with translate.
+
+
+
+
+3. Question Generator Function
 def question_generator():
-    # Generate random numbers
     a = random.randint(1, 9)
     b = random.randint(1, 9)
 
-    # Randomly select an operator
     operator_list = ["+", "-", "*"]
     selected_operator = random.choice(operator_list)
 
-    print(f"{a} {selected_operator} {b} = ?")
+    if selected_operator == "+":
+        operator_farsi = "به‌علاوه"
+    elif selected_operator == "-":
+        operator_farsi = "منها"
+    else:
+        operator_farsi = "ضربدر"
 
-    # Calculate the result
+    print(f"{a} {operator_farsi} {b} = ?")
+
     if selected_operator == "+":
         return a + b
     elif selected_operator == "-":
         return a - b
     else:
         return a * b
-a and b: Two random numbers between 1 and 9 are generated.
-operator_list: A list of mathematical operators (+, -, *).
-random.choice(operator_list): Randomly selects one operator from the list.
-Calculate the result: Depending on the selected operator, the result is calculated and returned as the function’s output.
+This function generates two random integers between 1 and 9, then randomly selects an arithmetic operator (addition, subtraction, or multiplication).
+The selected operator is translated to Persian for display purposes, and the question is printed in the format (e.g., 5 به‌علاوه 3 = ?).
+The result of the arithmetic operation is calculated and returned.
 
 
-3. Initial Game Settings
+
+4. Initial Settings
 question_number_limit = 5
 question_number = 0
 score = 0
 time_limit = 10
-question_number_limit: The total number of questions (here 5) that the user must answer.
-question_number: A counter for the number of questions answered.
-score: A counter for the user’s score.
-time_limit: The maximum time allowed for the user to answer each question (10 seconds).
+question_number_limit: This variable sets the maximum number of questions in the game (in this case, 5).
+question_number: This variable keeps track of the current question number (initialized to 0).
+score: This variable tracks the user's score (initialized to 0).
+time_limit: This variable defines the time limit for answering each question (set to 10 seconds).
 
 
-
-4. Game Loop
+5. Main Game Loop
 while question_number < question_number_limit:
-The loop continues until the user has answered the specified number of questions (5 questions in this case).
+    result = question_generator()  # Generate a new question
+    start_time = time.time()
 
+    user_answer = input("لطفاً جواب خود را وارد کنید: ")
+    
+    user_answer = convert_farsi_digits_to_english(user_answer)
+    
+    end_time = time.time()
+    time_dif = end_time - start_time
 
-5. Generating the Question and Measuring Start Time
-result = question_generator()  # Get the result of the question
-start_time = time.time()
-result: The correct result is calculated by the question_generator function and stored in the result variable.
-start_time: The time when the user starts answering is recorded.
+    if time_dif < time_limit:
+        try:
+            if int(user_answer) == result:  # Check if the answer is correct
+                score += 1 
+                print(f"صحیح! امتیاز فعلی: {score}")
+            else:
+                print(f"اشتباه! جواب صحیح {result} بود.")
+        except ValueError:
+            print("لطفاً یک عدد صحیح وارد کنید.")
+    else:
+        print("متاسفانه زمان شما تمام شد.")
 
+    question_number += 1          
+In this loop, questions are presented to the user, who must answer them within the specified time limit:
 
-6. Receiving the User’s Answer and End Time
-user_answer = input("Enter your answer: ")
-end_time = time.time()
-input: The user's answer is received.
-end_time: The time when the user finishes answering is recorded.
+A new question is generated using the question_generator function, and the start time is recorded.
+The user is prompted to enter their answer.
+If the user enters Persian digits, they are converted to English using the convert_farsi_digits_to_english function.
+The end time is recorded, and the time taken to answer is calculated.
+If the user answers within the 10-second limit:
 
-7. Calculating the Time Taken
-time_dif = end_time - start_time
-time_dif: The difference between the start and end time is calculated to find out how much time the user took to answer the question.
+The answer is checked to see if it's correct.
+If the answer is correct, the score is incremented, and a success message is displayed.
+If the answer is incorrect, the correct answer is shown.
+If the user does not enter a valid integer, a message is displayed asking them to enter a valid integer.
+If the user exceeds the 10-second limit, a message saying "متاسفانه زمان شما تمام شد." (Unfortunately, your time is up.) is displayed.
 
-
-8. Checking the User's Answer and Time
-if time_dif < time_limit:
-    try:
-        if int(user_answer) == result:  # Convert user input to integer
-            score += 1 
-            print(f"Correct! Current score: {score}")
-        else:
-            print(f"Wrong! The correct answer was {result}.")
-    except ValueError:
-        print("Please enter a valid integer.")
-else:
-    print("Unfortunately, your time is up.")
-Time Check: If the user answers within the 10-second time limit, the program moves to check the answer.
-Convert Input to Integer: The user’s input is converted to an integer and compared to the result.
-Increase Score: If the answer is correct, the user’s score increases.
-Display Correct Answer: If the answer is incorrect, the correct answer is shown to the user.
-Error Handling: If the user enters something other than a number, a ValueError is caught and handled, displaying a message to the user.
-Time Check: If the user takes longer than the allowed time, a message informs them that their time is up.
-
-9. Incrementing the Question Counter
-question_number += 1          
-The question counter is incremented to move to the next question.
-
-
-10. Displaying Final Score
-
-print(f"The game is over. Your final score is {score} out of {question_number_limit} questions.")
-After the game ends (when the user has answered all the questions), the user's final score and the total number of questions answered are displayed.
-Summary:
-This code creates a simple math question game where the user must answer questions within a specific time. If the answer is correct, the user’s score increases. If the time runs out or the answer is incorrect, the program informs the user. At the end of the game, the final score is displayed.0
+6. Final Score Display
+print(f"بازی به پایان رسید. امتیاز نهایی شما: {score} از {question_number_limit} سوال.")
+Once the number of questions reaches the limit, the loop ends, and the user's final score is displayed.
+Conclusion
+This code implements a fun and educational math quiz game that allows users to test their arithmetic skills and practice their response speed. The use of Persian for
+the questions makes it accessible for Persian-speaking users, enhancing their experience while engaging with basic math concepts.
 
 
 
+
+این کد یک بازی ساده ریاضی است که به کاربر سوالات ریاضی تصادفی می‌دهد و از او می‌خواهد در زمان محدود به آن‌ها پاسخ دهد. در ادامه به تفصیل هر بخش کد را بررسی می‌کنیم:
 
 1. وارد کردن کتابخانه‌ها
 import random
 import time
 random: برای تولید اعداد تصادفی استفاده می‌شود.
-time: برای اندازه‌گیری زمان شروع و پایان هر سوال استفاده می‌شود.
-
-
-
-
-2. تعریف تابع question_generator
+time: برای محاسبه زمان و کنترل زمان پاسخ‌دهی کاربر به سوالات استفاده می‌شود.
+2. تابع تبدیل اعداد فارسی به انگلیسی
+def convert_farsi_digits_to_english(input_str):
+    persian_digits = '۰۱۲۳۴۵۶۷۸۹'
+    english_digits = '0123456789'
+    translation_table = str.maketrans(persian_digits, english_digits)
+    return input_str.translate(translation_table)
+این تابع ورودی رشته‌ای از اعداد فارسی می‌گیرد و آن‌ها را به معادل انگلیسی‌شان تبدیل می‌کند.
+با استفاده از str.maketrans یک جدول ترجمه ایجاد می‌شود و سپس با translate این تبدیل اعمال می‌شود.
+3. تابع تولید سوالات
 def question_generator():
-    # پردازش اعداد تصادفی
     a = random.randint(1, 9)
     b = random.randint(1, 9)
-
-    # انتخاب تصادفی عملگر
+    
     operator_list = ["+", "-", "*"]
     selected_operator = random.choice(operator_list)
 
-    print(f"{a} {selected_operator} {b} = ?")
+    if selected_operator == "+":
+        operator_farsi = "به‌علاوه"
+    elif selected_operator == "-":
+        operator_farsi = "منها"
+    else:
+        operator_farsi = "ضربدر"
 
-    # محاسبه نتیجه
+    print(f"{a} {operator_farsi} {b} = ?")
+
     if selected_operator == "+":
         return a + b
     elif selected_operator == "-":
         return a - b
     else:
         return a * b
-a و b: دو عدد تصادفی بین 1 تا 9 تولید می‌شوند.
-operator_list: لیستی از عملگرهای ریاضی (+، -، *) است.
-random.choice(operator_list): یک عملگر به صورت تصادفی انتخاب می‌شود.
-محاسبه نتیجه: بسته به عملگر انتخاب‌شده، نتیجه محاسبه و به عنوان خروجی تابع بازگردانده می‌شود.
-
-
-
-3. تنظیمات اولیه بازی
+این تابع دو عدد تصادفی بین 1 تا 9 تولید می‌کند و یک عملگر ریاضی (جمع، تفریق، یا ضرب) به طور تصادفی انتخاب می‌کند.
+سپس سوال را به زبان فارسی نمایش می‌دهد (با استفاده از عملگرهای فارسی) و نتیجه آن را محاسبه و برمی‌گرداند.
+4. تنظیمات اولیه
 question_number_limit = 5
 question_number = 0
 score = 0
 time_limit = 10
-question_number_limit: تعداد سوالات کل (در اینجا 5) که کاربر باید پاسخ دهد.
-question_number: شمارنده برای تعداد سوالات پاسخ داده شده.
-score: شمارنده امتیاز کاربر.
-time_limit: حداکثر زمانی که کاربر برای پاسخ به هر سوال دارد (10 ثانیه).
-
-
-
-
-
-4. حلقه بازی
+question_number_limit: حداکثر تعداد سوالات بازی (در اینجا ۵).
+question_number: شمارنده سوالات فعلی (ابتدا ۰).
+score: امتیاز کاربر (ابتدا ۰).
+time_limit: محدودیت زمانی برای پاسخ‌دهی به هر سوال (در اینجا ۱۰ ثانیه).
+5. حلقه اصلی بازی
+   
 while question_number < question_number_limit:
-این حلقه اجرا می‌شود تا زمانی که کاربر به تعداد مشخصی سوال پاسخ دهد (در اینجا 5 سوال).
+    result = question_generator()  # دریافت نتیجه سوال
+    start_time = time.time()
 
+    user_answer = input("لطفاً جواب خود را وارد کنید: ")
+    
+    user_answer = convert_farsi_digits_to_english(user_answer)
+    
+    end_time = time.time()
+    time_dif = end_time - start_time
 
+    if time_dif < time_limit:
+        try:
+            if int(user_answer) == result:
+                score += 1 
+                print(f"صحیح! امتیاز فعلی: {score}")
+            else:
+                print(f"اشتباه! جواب صحیح {result} بود.")
+        except ValueError:
+            print("لطفاً یک عدد صحیح وارد کنید.")
+    else:
+        print("متاسفانه زمان شما تمام شد.")
 
+    question_number += 1          
+در این حلقه، سوالات به کاربر نمایش داده می‌شود و او باید در زمان معین به آن‌ها پاسخ دهد:
 
-5. تولید سوال و اندازه‌گیری زمان شروع
-result = question_generator()  # دریافت نتیجه سوال
-start_time = time.time()
-result: نتیجه صحیح سوال توسط تابع question_generator محاسبه و در متغیری ذخیره می‌شود.
-start_time: زمان شروع دریافت پاسخ از کاربر ثبت می‌شود.
+سوال جدید تولید می‌شود و زمان شروع ثبت می‌شود.
+کاربر از او خواسته می‌شود که پاسخ خود را وارد کند.
+اگر کاربر از اعداد فارسی استفاده کند، پاسخ به اعداد انگلیسی تبدیل می‌شود.
+زمان پایان پاسخ‌دهی ثبت می‌شود و زمان اختلاف محاسبه می‌شود.
+اگر کاربر در کمتر از ۱۰ ثانیه پاسخ دهد:
 
+پاسخ او بررسی می‌شود که آیا صحیح است یا خیر.
+اگر پاسخ صحیح باشد، امتیاز کاربر افزایش می‌یابد و پیام "صحیح!" نمایش داده می‌شود.
+اگر پاسخ اشتباه باشد، جواب صحیح به کاربر نشان داده می‌شود.
+اگر کاربر عدد صحیح وارد نکند، پیامی مبنی بر این که "لطفاً یک عدد صحیح وارد کنید" نمایش داده می‌شود.
+اگر زمان بیش از ۱۰ ثانیه باشد، پیام "متاسفانه زمان شما تمام شد." نمایش داده می‌شود.
 
-
-6. دریافت پاسخ کاربر و زمان پایان
-user_answer = input("Enter your answer: ")
-end_time = time.time()
-input: دریافت پاسخ کاربر.
-end_time: زمان پایان دریافت پاسخ کاربر ثبت می‌شود.
-
-
-
-7. محاسبه زمان صرف‌شده
-time_dif = end_time - start_time
-time_dif: تفاوت بین زمان شروع و پایان محاسبه می‌شود تا مدت زمان صرف شده برای پاسخ به سوال محاسبه گردد.
-
-
-
-8. بررسی پاسخ کاربر و زمان
-if time_dif < time_limit:
-    try:
-        if int(user_answer) == result:  # تبدیل ورودی کاربر به عدد صحیح
-            score += 1 
-            print(f"صحیح! امتیاز فعلی: {score}")
-        else:
-            print(f"اشتباه! جواب صحیح {result} بود.")
-    except ValueError:
-        print("لطفاً یک عدد صحیح وارد کنید.")
-else:
-    print("متاسفانه زمان شما تمام شد.")
-بررسی زمان: اگر کاربر در کمتر از 10 ثانیه (زمان مجاز) پاسخ دهد، برنامه وارد بخش بررسی پاسخ می‌شود.
-تبدیل ورودی به عدد صحیح: ورودی کاربر به عدد صحیح تبدیل می‌شود و با نتیجه مقایسه می‌شود.
-افزایش امتیاز: اگر پاسخ صحیح باشد، امتیاز کاربر افزایش می‌یابد.
-نمایش نتیجه صحیح: اگر پاسخ اشتباه باشد، نتیجه صحیح به کاربر نمایش داده می‌شود.
-مدیریت خطا: اگر کاربر به جای عدد، کاراکتر دیگری وارد کند، با استفاده از بلوک try-except خطای ValueError مدیریت می‌شود و پیغام مناسبی به کاربر نمایش داده می‌شود.
-بررسی زمان: اگر زمان کاربر بیشتر از مقدار مجاز باشد، پیغام "زمان شما تمام شد" نمایش داده می‌شود.
-
-
-
-9. افزایش شمارنده سوالات
-question_number += 1          
-شمارنده سوالات افزایش می‌یابد تا به سوال بعدی بروید.
-
-
-
-10. نمایش امتیاز پایانی
+6. نمایش امتیاز پایانی
 print(f"بازی به پایان رسید. امتیاز نهایی شما: {score} از {question_number_limit} سوال.")
-پس از پایان بازی (یعنی وقتی که کاربر به تمام سوالات پاسخ داد)، امتیاز نهایی کاربر و تعداد سوالات پاسخ داده‌شده نمایش داده می‌شود.
-خلاصه:
-این کد یک بازی ساده سوالات ریاضی ایجاد می‌کند که در آن کاربر باید به سوالات در زمان مشخص پاسخ دهد. اگر پاسخ صحیح باشد، امتیاز کاربر افزایش می‌یابد و اگر زمان تمام شود یا پاسخ اشتباه باشد، به کاربر اطلاع داده می‌شود. در پایان بازی، امتیاز نهایی کاربر نمایش داده می‌شود.
+پس از پایان بازی، امتیاز نهایی کاربر به او نمایش داده می‌شود.
+نتیجه‌گیری
+این کد یک بازی ریاضی سرگرم‌کننده و آموزشی است که به کاربر امکان می‌دهد تا توانایی‌های ریاضی خود را تست کند و سرعت پاسخ‌دهی خود را تمرین کند. همچنین با توجه به تعامل به زبان فارسی، کاربرانی که به این زبان صحبت می‌کنند می‌توانند به راحتی از این برنامه استفاده کنند.
+
